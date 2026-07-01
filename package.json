@@ -1,0 +1,24 @@
+{
+  "name": "backend-project",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [
+    "javascript",
+    "backend"
+  ],
+  "homepage": "https://github.com/surajthapa-code/backend-project#readme",
+  "bugs": {
+    "url": "https://github.com/surajthapa-code/backend-project/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/surajthapa-code/backend-project.git"
+  },
+  "license": "ISC",
+  "author": "suraj thapa",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
