@@ -9,7 +9,21 @@ env.config({
   path: "./env",
 });
 
-connectDB();
+connectDB()
+
+  .then(() => {
+    app.listen(process.env.PORT || 8000, () => {
+      console.log(`listning on PORT: ${process.env.PORT}`);
+    });
+    app.on("Error", (err) => {
+      console.log("error acc in mongo db", err);
+      throw err;
+    });
+  })
+  .catch((err) => {
+    console.log("monogo db connection failed", err);
+    throw err;
+  });
 //----------->
 //Normal approach
 
