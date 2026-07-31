@@ -1,6 +1,6 @@
 import env from "dotenv";
-
 import { connectDB } from "./database/index.js";
+import { app } from "./app.js";
 
 // import mongoose from "mongoose";
 // import { DB_NAME } from "./constants";
@@ -10,19 +10,16 @@ env.config({
 });
 
 connectDB()
-
   .then(() => {
     app.listen(process.env.PORT || 8000, () => {
       console.log(`listning on PORT: ${process.env.PORT}`);
     });
     app.on("Error", (err) => {
-      console.log("error acc in mongo db", err);
-      throw err;
+      console.log("error while starting server", err);
     });
   })
   .catch((err) => {
     console.log("monogo db connection failed", err);
-    throw err;
   });
 //----------->
 //Normal approach

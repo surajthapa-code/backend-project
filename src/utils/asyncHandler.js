@@ -5,4 +5,3 @@ const asyncHandler = (handler) => {
 };
 
 export { asyncHandler };
- 

@@ -24,11 +24,11 @@ const userSchema = new Schema(
       trim: true,
     },
     avatar: {
-      type: String, //cloudinary url
+      type: String, // cloud url
       required: true,
     },
     coverImage: {
-      type: String, //cloudinary url
+      type: String, // cloud url
     },
     watchHistory: {
       type: mongoose.Schema.ObjectId,
