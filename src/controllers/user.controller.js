@@ -1,5 +1,6 @@
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/coudinary.js";
 
@@ -14,13 +15,11 @@ import { uploadOnCloudinary } from "../utils/coudinary.js";
 //return yes
 
 export const registerUser = asyncHandler(async (req, res) => {
-  const { username, password, FullName, email } = req.body;
+  const { username, password, fullName, email } = req.body;
 
   //empty field check
   if (
-    [username || password || FullName || email].some(
-      (field) => field?.trim() === ""
-    )
+    [username, password, fullName, email].some((field) => field?.trim() === "")
   ) {
     throw new ApiError(404, "Bad request,All fields are Required!");
   }
@@ -30,15 +29,15 @@ export const registerUser = asyncHandler(async (req, res) => {
 
   //existing user check
   const isUserExisting = await User.findOne({
-    $or: [{ usernam }, { email }],
+    $or: [{ username }, { email }],
   });
   if (isUserExisting) {
     throw new ApiError(409, "existing user!");
   }
 
   //file check
-  const avatarLocalPath = req.files?.avatar[0]?.path;
-  const coverImageLocalPath = req.files?.coverImage[0]?.path;
+  const avatarLocalPath = req.files?.avatar?.[0]?.path;
+  const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
 
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar file Required");
@@ -52,7 +51,7 @@ export const registerUser = asyncHandler(async (req, res) => {
 
   //create user object and db entry
   const userInst = await User.create({
-    FullName,
+    fullName,
     email,
     username,
     password,
@@ -60,14 +59,14 @@ export const registerUser = asyncHandler(async (req, res) => {
     avatar: avatarRef?.url || "",
   });
 
-  const DBuser = await userInst
-    .findById(userInst._id)
-    .select("-password -refreshToken");
+  const DBuser = await User.findById(userInst._id).select(
+    "-password -refreshToken"
+  );
 
   if (!DBuser) {
     throw new ApiError(500, "userwas not created!");
   }
-  
+
   //res
   return res
     .status(201)
