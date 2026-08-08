@@ -22,10 +22,10 @@ export const registerUser = asyncHandler(async (req, res) => {
   if (
     [username, password, fullName, email].some((field) => field?.trim() === "")
   ) {
-    throw new ApiError(404, "Bad request,All fields are Required!");
+    throw new ApiError(404, "Bad request, All fields are Required!");
   }
 
-  //--> ill do this for email syntax validation
+  //--> email syntax validation --
   // if((email.toLowerCase()))
 
   //check if user already existing in db: email, username
@@ -75,4 +75,116 @@ export const registerUser = asyncHandler(async (req, res) => {
   return res
     .status(201)
     .json(new ApiResponse(200, DBuser, "user Registered Sucess!"));
+});
+
+const accessAndRefreshTokenGeneration = async (userID) => {
+  try {
+    const user = await User.findById(userID);
+    const accessToken = await user.generateAccessToken();
+    const refreshToken = await user.generateRefreshToken();
+
+    user.refreshToken = refreshToken;
+
+    await user.save({ validateBeforeSave: false });
+
+    return { accessToken, refreshToken };
+  } catch (err) {
+    throw new ApiError(500, "Token generation failed!");
+  }
+};
+
+export const loginUser = asyncHandler(async (req, res) => {
+  //data from req body
+  //validation - not empty
+  //search if user already exist
+  // Search user already exists.
+  //password check
+  //access token and refresh token generation
+  //send them in cookie and send user details in response
+  //return success response
+
+  //data from req body
+  const { email, username, password } = req.body;
+
+  //validation - not empty
+  if ([email, username, password].some((field) => field?.trim() === "")) {
+    throw new ApiError(400, "All fields are required!");
+  }
+  //search if user already exist
+  const isUserExisting = await User.findOne({
+    $or: [{ email }, { username }],
+  });
+
+  // Search user already exists.
+  if (!isUserExisting) {
+    throw new ApiError(404, "user not found!");
+  }
+
+  //password check
+  const isPasswordCorrect = await isUserExisting.isPasswordCorrect(password);
+
+  if (!isPasswordCorrect) {
+    throw new ApiError(401, "Invalid password!");
+  }
+
+  //access token and refresh token generation
+  const { accessToken, refreshToken } = await accessAndRefreshTokenGeneration(
+    isUserExisting._id
+  );
+
+  //get user details from db
+  const LoggedInUser = await User.findById(isUserExisting._id).select(
+    "-password -refreshToken"
+  );
+  if (!LoggedInUser) {
+    throw new ApiError(500, "user not found!");
+  }
+
+  //send them in cookie and send user details in response
+
+  const cookieOptions = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
+    .json(
+      new ApiResponse(
+        200,
+        { user: LoggedInUser, accessToken, refreshToken },
+        "user logged in sucess!"
+      )
+    );
+});
+
+//logout user
+export const logoutUser = asyncHandler(async (req, res) => {
+  //get user id from req.user
+  //find user in db
+  //remove refresh token from db
+  //clear cookies and send response
+  const userInfo = req.user;
+  User.findByIdAndUpdate(
+    userInfo._id,
+    {
+      $set: {
+        refreshToken: undefined,
+      },
+    },
+    {
+      new: true,
+    }
+  );
+  const cookieOptions = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .clearCookie("accessToken", cookieOptions)
+    .clearCookie("refreshToken", cookieOptions);
 });
