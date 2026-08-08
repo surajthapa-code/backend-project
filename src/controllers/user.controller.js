@@ -15,6 +15,7 @@ import { uploadOnCloudinary } from "../utils/coudinary.js";
 //return yes
 
 export const registerUser = asyncHandler(async (req, res) => {
+  //get user details from frontend
   const { username, password, fullName, email } = req.body;
 
   //empty field check
@@ -27,7 +28,7 @@ export const registerUser = asyncHandler(async (req, res) => {
   //--> ill do this for email syntax validation
   // if((email.toLowerCase()))
 
-  //existing user check
+  //check if user already existing in db: email, username
   const isUserExisting = await User.findOne({
     $or: [{ username }, { email }],
   });
@@ -35,7 +36,7 @@ export const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(409, "existing user!");
   }
 
-  //file check
+  //check for images , check for avatar
   const avatarLocalPath = req.files?.avatar?.[0]?.path;
   const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
 
@@ -49,7 +50,7 @@ export const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Avatar is Required!");
   }
 
-  //create user object and db entry
+  //crreat user object - create enty in db
   const userInst = await User.create({
     fullName,
     email,
@@ -59,15 +60,18 @@ export const registerUser = asyncHandler(async (req, res) => {
     avatar: avatarRef?.url || "",
   });
 
+  //remove password and refresh token and show them to userfrontend res
+
   const DBuser = await User.findById(userInst._id).select(
     "-password -refreshToken"
   );
 
+  //check for user creation
   if (!DBuser) {
     throw new ApiError(500, "userwas not created!");
   }
 
-  //res
+  //return yes
   return res
     .status(201)
     .json(new ApiResponse(200, DBuser, "user Registered Sucess!"));
