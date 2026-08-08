@@ -4,17 +4,35 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/coudinary.js";
 
-//get user details from frontend
-//validation - not empty
-//check if user already existing in db: email, username
-//check for images , check for avatar
-//upload them to cloudinary
-//crreat user object - create enty in db
-//remove password and refresh token and show them to userfrontend res
-//check for user creation
-//return yes
+//--- token generation
+const accessAndRefreshTokenGeneration = async (userID) => {
+  try {
+    const user = await User.findById(userID);
+    const accessToken = await user.generateAccessToken();
+    const refreshToken = await user.generateRefreshToken();
 
+    user.refreshToken = refreshToken;
+
+    await user.save({ validateBeforeSave: false });
+
+    return { accessToken, refreshToken };
+  } catch (err) {
+    throw new ApiError(500, "Token generation failed!");
+  }
+};
+
+//---register user
 export const registerUser = asyncHandler(async (req, res) => {
+  //get user details from frontend
+  //validation - not empty
+  //check if user already existing in db: email, username
+  //check for images , check for avatar
+  //upload them to cloudinary
+  //crreat user object - create enty in db
+  //remove password and refresh token and show them to userfrontend res
+  //check for user creation
+  //return yes
+
   //get user details from frontend
   const { username, password, fullName, email } = req.body;
 
@@ -77,22 +95,7 @@ export const registerUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, DBuser, "user Registered Sucess!"));
 });
 
-const accessAndRefreshTokenGeneration = async (userID) => {
-  try {
-    const user = await User.findById(userID);
-    const accessToken = await user.generateAccessToken();
-    const refreshToken = await user.generateRefreshToken();
-
-    user.refreshToken = refreshToken;
-
-    await user.save({ validateBeforeSave: false });
-
-    return { accessToken, refreshToken };
-  } catch (err) {
-    throw new ApiError(500, "Token generation failed!");
-  }
-};
-
+//---login user
 export const loginUser = asyncHandler(async (req, res) => {
   //data from req body
   //validation - not empty
@@ -160,7 +163,7 @@ export const loginUser = asyncHandler(async (req, res) => {
     );
 });
 
-//logout user
+//---logout user
 export const logoutUser = asyncHandler(async (req, res) => {
   //get user id from req.user
   //find user in db
