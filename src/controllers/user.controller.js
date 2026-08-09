@@ -170,7 +170,7 @@ export const logoutUser = asyncHandler(async (req, res) => {
   //remove refresh token from db
   //clear cookies and send response
   const userInfo = req.user;
-  User.findByIdAndUpdate(
+  const LoggedOutUser = await User.findByIdAndUpdate(
     userInfo._id,
     {
       $set: {
@@ -181,6 +181,7 @@ export const logoutUser = asyncHandler(async (req, res) => {
       new: true,
     }
   );
+
   const cookieOptions = {
     httpOnly: true,
     secure: true,
@@ -189,5 +190,14 @@ export const logoutUser = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .clearCookie("accessToken", cookieOptions)
-    .clearCookie("refreshToken", cookieOptions);
+    .clearCookie("refreshToken", cookieOptions)
+    .json(
+      new ApiResponse(
+        200,
+        {
+          LoggedOutUser,
+        },
+        (message = "logout sucess")
+      )
+    );
 });
