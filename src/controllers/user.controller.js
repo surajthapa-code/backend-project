@@ -3,11 +3,11 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/coudinary.js";
+import jwt from "jsonwebtoken";
 
 const cookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  secure: true,
   path: "/",
 };
 
@@ -188,4 +188,39 @@ export const logoutUser = asyncHandler(async (req, res) => {
     .clearCookie("accessToken", cookieOptions)
     .clearCookie("refreshToken", cookieOptions)
     .json(new ApiResponse(200, {}, "Logout success"));
+});
+
+//end point
+export const refreshAccessToken = asyncHandler(async (req, res) => {
+  try {
+    const incomingRefreshToken =
+      req.cookies.refreshToken || req.body.refreshToken;
+
+    if (!incomingRefreshToken) {
+      throw new ApiError(401, "UnAuthorised Request!");
+    }
+
+    const decodedToken = await jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN_SECRET
+    );
+
+    const userInfo = await User.findById(decodedToken._id);
+
+    if (!userInfo) {
+      throw new ApiError(404, "Invalid RefreshToken!");
+    }
+    if (incomingRefreshToken !== userInfo.refreshToken) {
+      throw new ApiError(401, "Refresh Token is Expired or used!");
+    }
+
+    const tokens = await accessAndRefreshTokenGeneration(userInfo._id);
+    res
+      .status(200)
+      .cookie("accessToken", tokens.accessToken, cookieOptions)
+      .cookie("refreshToken", tokens.refreshToken, cookieOptions)
+      .json(new ApiResponse(200, tokens, (message = "refresh done")));
+  } catch (error) {
+    throw new ApiError(500, error?.message || "error while token refresh!");
+  }
 });
