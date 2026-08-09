@@ -4,6 +4,13 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/coudinary.js";
 
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  path: "/",
+};
+
 //--- token generation
 const accessAndRefreshTokenGeneration = async (userID) => {
   try {
@@ -144,12 +151,6 @@ export const loginUser = asyncHandler(async (req, res) => {
   }
 
   //send them in cookie and send user details in response
-
-  const cookieOptions = {
-    httpOnly: true,
-    secure: true,
-  };
-
   return res
     .status(200)
     .cookie("accessToken", accessToken, cookieOptions)
@@ -182,22 +183,9 @@ export const logoutUser = asyncHandler(async (req, res) => {
     }
   );
 
-  const cookieOptions = {
-    httpOnly: true,
-    secure: true,
-  };
-
   return res
     .status(200)
     .clearCookie("accessToken", cookieOptions)
     .clearCookie("refreshToken", cookieOptions)
-    .json(
-      new ApiResponse(
-        200,
-        {
-          LoggedOutUser,
-        },
-        (message = "logout sucess")
-      )
-    );
+    .json(new ApiResponse(200, {}, "Logout success"));
 });

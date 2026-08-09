@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser";
 export const app = e();
 app.use(
   cors({
-    origin: "proces.env.CORS_ORIGIN",
+    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
     credentials: true,
   })
 );

@@ -6,27 +6,27 @@ import { User } from "../models/user.model.js";
 export const verifyJWT = asyncHandler(async (req, res, next) => {
   try {
     const token =
-      req.cookies?.accesstoken ||
+      req.cookies?.accessToken ||
       req.header("Authorization")?.replace("Bearer ", "");
 
     if (!token) {
       throw new ApiError(401, "Access token is missing!");
     }
-    console.log(token);
-    const istokenValid = await jwt.verify(
+
+    const isTokenValid = await jwt.verify(
       token,
-      process.env.ACCESS_tOKEN_SECREt
+      process.env.ACCESS_TOKEN_SECRET
     );
 
-    if (!istokenValid) {
+    if (!isTokenValid) {
       throw new ApiError(401, "Invalid access token!");
     }
 
-    const userData = await User.findById(istokenValid._id).select(
-      "-password -refreshtoken"
+    const userData = await User.findById(isTokenValid._id).select(
+      "-password -refreshToken"
     );
 
-    console.log(istokenValid);
+    console.log(isTokenValid);
     if (!userData) {
       throw new ApiError(404, "User not found!");
     }
