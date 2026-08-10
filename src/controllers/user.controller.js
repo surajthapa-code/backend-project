@@ -213,7 +213,7 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
     if (incomingRefreshToken !== userInfo.refreshToken) {
       throw new ApiError(401, "Refresh Token is Expired or used!");
     }
-    
+
     const { accessToken, refreshToken } = await accessAndRefreshTokenGeneration(
       userInfo._id
     );
@@ -228,3 +228,27 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
     throw new ApiError(500, error?.message || "error while token refresh!");
   }
 });
+
+//password change
+export const updatePassword = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
+  if (!(oldPassword || newPassword)) {
+    throw new ApiError(400, "Bad request: required fields are missing");
+  }
+
+  const user = await User.findById(req.user?._id);
+  
+  const isPasswordCorrect = await User.isPasswordCorrect(oldPassword);
+  if (!isPasswordCorrect) {
+    throw new ApiError(400, "Invalid password");
+  }
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "password changed sucessfully"));
+});
+
+//get user
