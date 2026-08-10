@@ -9,8 +9,15 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
       req.cookies?.accessToken ||
       req.header("Authorization")?.replace("Bearer ", "");
 
+    if (token == undefined) {
+      throw new ApiError(401, "Login first");
+    }
+
     if (!token) {
-      throw new ApiError(401, "Access token is missing!");
+      throw new ApiError(
+        401,
+        "Access token is missing!, guess you are not logged in"
+      );
     }
 
     const isTokenValid = await jwt.verify(
@@ -33,7 +40,6 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
     req.user = userData;
     console.log(userData, "auth middleware work done here");
     next();
-    
   } catch (error) {
     throw new ApiError(401, error?.message || "Invalid Access token");
   }
