@@ -238,7 +238,7 @@ export const updatePassword = asyncHandler(async (req, res) => {
   }
 
   const user = await User.findById(req.user?._id);
-  
+
   const isPasswordCorrect = await User.isPasswordCorrect(oldPassword);
   if (!isPasswordCorrect) {
     throw new ApiError(400, "Invalid password");
@@ -252,3 +252,9 @@ export const updatePassword = asyncHandler(async (req, res) => {
 });
 
 //get user
+export const getUser = asyncHandler(async (req, res) => {
+  // const userData = await User.findById(req.user?._id);
+  return res
+    .status(200)
+    .json(new ApiResponse(200, req.user, "user fetch sucess"));
+});
