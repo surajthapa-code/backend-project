@@ -241,7 +241,7 @@ export const updatePassword = asyncHandler(async (req, res) => {
 
   const isPasswordCorrect = await User.isPasswordCorrect(oldPassword);
   if (!isPasswordCorrect) {
-    throw new ApiError(400, "Invalid password");
+    throw new ApiError(400, "Invalid old password");
   }
   user.password = newPassword;
   await user.save({ validateBeforeSave: false });
@@ -257,4 +257,23 @@ export const getUser = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, req.user, "user fetch sucess"));
+});
+
+//update userDetails
+export const updateUserDetails = asyncHandler(async (req, res) => {
+  const { fullName, email } = req.body;
+  if (!(fullName && email)) {
+    throw new ApiError(400, {}, "invalid request all fill required fields ");
+  }
+  const updatedUser = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        fullName: fullName,
+        email: email,
+      },
+    },
+    { new: true }
+  ).select("-password");
+  return res.status(201).json(201, updatedUser, "Details updated sucess");
 });
