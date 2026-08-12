@@ -300,4 +300,42 @@ export const updateUserAvatar = asyncHandler(async (req, res) => {
     },
     { new: true }
   ).select("-password");
+
+  if (!avatarUpdatedUser) {
+    throw new ApiError(404, "error while updating avatar in db");
+  }
+  return res
+    .status(201)
+    .json(new ApiResponse(201, avatarUpdatedUser, "avatar url update sucess"));
+});
+
+//coverImageUpdatedUser
+export const updateUsercoverImage = asyncHandler(async (req, res) => {
+  const coverImageLocalPath = req.file?.path;
+
+  if (!coverImageLocalPath) {
+    throw new ApiError(400, "bad request during coverImage update");
+  }
+
+  const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+
+  if (!coverImage.url) {
+    throw new ApiError(400, "error while uploading coverImage on cloudinary");
+  }
+  const coverImageUpdatedUser = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        coverImage: coverImage.url,
+      },
+    },
+    { new: true }
+  ).select("-password");
+
+  if (!coverImageUpdatedUser) {
+    throw new ApiError(404, "error while updating coverImage in db");
+  }
+  return res
+    .status(201)
+    .json(new ApiResponse(201, coverImageUpdatedUser, "coverImage url update sucess"));
 });
