@@ -6,9 +6,19 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export const deleteFromCloudinary = async function (publicId, resourceType = "image") {
+// Changed parameter name to 'urlOrId' to make it flexible
+export const deleteFromCloudinary = async function (
+  urlOrId,
+  resourceType = "image"
+) {
   try {
-    if (!publicId) return null;
+    if (!urlOrId) return null;
+
+    // extract the publicId
+    let publicId = urlOrId;
+    if (urlOrId.includes("://cloudinary.com")) {
+      publicId = urlOrId.split("/").pop().split(".")[0];
+    }
 
     const res = await cloudinary.uploader.destroy(publicId, {
       resource_type: resourceType,
