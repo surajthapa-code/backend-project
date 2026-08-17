@@ -4,6 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadOnCloudinary } from "../utils/coudinary.js";
 import jwt from "jsonwebtoken";
+import { deleteFromCloudinary } from "../utils/deleteFromCloudinary.js";
 
 const cookieOptions = {
   httpOnly: true,
@@ -287,7 +288,7 @@ export const updateUserAvatar = asyncHandler(async (req, res) => {
   }
 
   const avatar = await uploadOnCloudinary(avatarLocalPath);
-
+  const oldUserIns = await User.findById(req.user?._id);
   if (!avatar.url) {
     throw new ApiError(400, "error while uploading avatar on cloudinary");
   }
@@ -303,6 +304,10 @@ export const updateUserAvatar = asyncHandler(async (req, res) => {
 
   if (!avatarUpdatedUser) {
     throw new ApiError(404, "error while updating avatar in db");
+  }
+  const Deleted = await deleteFromCloudinary(oldUserIns.avatar);
+  if (Deleted) {
+    console.log("deleted avatar from cloudinary sucess", Deleted);
   }
   return res
     .status(201)
@@ -354,7 +359,7 @@ export const updateUsercoverImage = asyncHandler(async (req, res) => {
     );
 });
 
-// 
+//
 export const getUserChannelProfile = asyncHandler(async (req, res) => {
   const username = req.params;
 
