@@ -16,8 +16,10 @@ export const deleteFromCloudinary = async function (
 
     // extract the publicId
     let publicId = urlOrId;
-    if (urlOrId.includes("://cloudinary.com")) {
-      publicId = urlOrId.split("/").pop().split(".")[0];
+    if (urlOrId.includes("://res.cloudinary.com")) {
+      const afterVersion = urlOrId.split("/v")[1];
+      const pathWithoutVersion = afterVersion.split("/").slice(1).join("/");
+      publicId = pathWithoutVersion.split(".")[0];
     }
 
     const res = await cloudinary.uploader.destroy(publicId, {
