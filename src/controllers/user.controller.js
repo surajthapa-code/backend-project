@@ -191,7 +191,7 @@ export const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "Logout success"));
 });
 
-//end point
+//---end point
 export const refreshAccessToken = asyncHandler(async (req, res) => {
   try {
     const incomingRefreshToken =
@@ -230,7 +230,7 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 });
 
-//password change
+//---password change
 export const updatePassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
@@ -252,7 +252,7 @@ export const updatePassword = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "password changed sucessfully"));
 });
 
-//get user
+//---get user
 export const getUser = asyncHandler(async (req, res) => {
   // const userData = await User.findById(req.user?._id);
   return res
@@ -260,7 +260,7 @@ export const getUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, req.user, "user fetch sucess"));
 });
 
-//update userDetails
+//---update userDetails
 export const updateUserDetails = asyncHandler(async (req, res) => {
   const { fullName, email } = req.body;
   if (!(fullName && email)) {
@@ -279,7 +279,7 @@ export const updateUserDetails = asyncHandler(async (req, res) => {
   return res.status(201).json(201, updatedUser, "Details updated sucess");
 });
 
-//updateUserAvatar
+//---updateUserAvatar
 export const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
 
@@ -314,7 +314,7 @@ export const updateUserAvatar = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, avatarUpdatedUser, "avatar url update sucess"));
 });
 
-//updateUserCoverImage
+//---updateUserCoverImage
 export const updateUsercoverImage = asyncHandler(async (req, res) => {
   const coverImageLocalPath = req.file?.path;
 
@@ -359,7 +359,7 @@ export const updateUsercoverImage = asyncHandler(async (req, res) => {
     );
 });
 
-//
+//--- getUserChannelProfile
 export const getUserChannelProfile = asyncHandler(async (req, res) => {
   const username = req.params;
 
